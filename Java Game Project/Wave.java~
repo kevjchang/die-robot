@@ -1,0 +1,59 @@
+import java.util.LinkedList;
+/**
+ * A class representing a wave of enemies. Enemies are stored in a list and created depending on the wave number
+ */
+public class Wave {
+  
+  /**
+   * The LinkedList containing the enemies
+   */
+  private LinkedList<Enemy> enemyList = new LinkedList<Enemy>(); //Already made to avoid nullPointerException
+  
+  /**
+   * The wave number
+   */
+  private int waveNum;
+  
+  /**
+   * Gets the enemy list
+   * @return The LinkedList containing the enemies
+   */
+  public LinkedList<Enemy> getEnemyList() {return enemyList;}
+  
+  /**
+   * Gets the wave number
+   * @return The wave number
+   */
+  public int getWaveNum() {return waveNum;}
+  
+  /**
+   * Sets the wave number
+   * @param num The new wave number
+   */
+  public void setWaveNum(int num) {waveNum = num;}
+  
+  /**
+   * Checks whether the wave is over or not
+   * @return True or False; If there are no enemies left then the wave is indeed over
+   */
+  public boolean waveOver() {return enemyList.isEmpty();}
+  
+  /**
+   * Creates a new wave given a wave number
+   * @param waveNum The new waveNumber
+   * @param route The route of Path tiles that is created by the player
+   */
+  public void newWave(int waveNum, LinkedList<Tile> route) { //Adding map object to consider new route every time a new level (wave) is generated
+    this.waveNum = waveNum;
+    int spawnX = 0;
+    
+    for (int i=0; i<(waveNum*10); i++) {
+      enemyList.add(new Robot(i*-60, 0, route)); //Adding in negative coordinates so robots don't spawn all on the same place
+      spawnX = i*-60;
+      if ((i%25==0)&&(i!=0)) { //Every 25 normal robots, a Tank enemy is created for added difficulty
+        enemyList.remove(enemyList.size()-1);
+        enemyList.add(new Tank(i*-60, 0, route));
+      }
+    }
+  }
+}

@@ -1,0 +1,152 @@
+import java.util.LinkedList;
+import java.util.Queue;
+import java.awt.Graphics;
+/**
+ * A class representing the map displayed on the main screen
+ */
+public class Map {
+  
+  /**
+   * A 2d array containing each tile of the map
+   */
+  private Tile[][] screenMap;
+  
+  /**
+   * Gets the screenMap
+   * @return screenMap
+   */
+  public Tile[][] getScreenMap() {
+    return screenMap;
+  }
+  
+  /**
+   * Creates a new Map object from scratch
+   */
+  public Map() {
+    screenMap = new Tile[10][15]; //dimensions of game map will be 1500x1000, with 100x100 pixel tiles
+    
+    for (int i=0; i<screenMap.length; i++) {
+      for (int j=0; j<screenMap[0].length; j++) {
+        int posX = j*100;
+        int posY = i*100;
+        screenMap[i][j] = new Ground(posX,posY);
+      }
+    }
+    //Set Path tiles for first and last tile here
+    screenMap[0][0] = new Path(0,0);
+    screenMap[9][14] = new Path(1400,900);
+  }
+  
+  /**
+   * Gets the tile on the map given a set of coordinates
+   * @param x the x coordinate given
+   * @param y the y coordinate given
+   * @return the specific tile that contains those x and y coordinates
+   */
+  public Tile getTile(int x, int y) {
+    Tile t; //Temporary variable
+    for (int i=0; i<screenMap.length; i++) {
+      for (int j=0; j<screenMap[0].length; j++) {
+        t = screenMap[i][j];
+        if ((t.posX<=x)&&(t.posX+t.getWidth()>x)&&(t.posY<=y)&&(t.posY+t.getHeight()>y)) {
+          return t;
+        }
+      }
+    }
+    return null; //Returns null if no tile is found
+  }
+  
+  
+  /**
+   * Changes a tile selected with another tile
+   * @param posX The x coordinate of the tile selected
+   * @param posY The y coordinate of the tile selected
+   * @param t The replacement Tile
+   */
+  public void changeTile(Tile t) {
+    int posX = t.posX/100;
+    int posY = t.posY/100;
+    if (((posX==0)&&(posY==0))||((posX==14)&&(posY==9))) {
+      return; //If the tile selected to be changed is the first or last path, we do not change it
+    }
+    screenMap[posY][posX] = t;
+  }
+  
+  
+  /**
+   * Finds a path for the enemies to follow. Path tiles are added to a Queue in the order that they should be followed
+   * Simultaneously checks if the tiles placed create a valid path in the first place
+   * If path tiles do not form a valid path, then the method returns null
+   * @return A Queue containing the path tiles (and their coordinates) that enemies need to follow
+   */
+  public Queue<Tile> findRoute() {
+    Queue<Tile> route = new LinkedList<Tile>(); //The queue holding all the Path tiles that form a path
+    //we know that the first element (screenMap[0][0]) in the map array is a path tile, so we start from there.
+    int pathCount = 0; //Tracks the number of Path tiles on the map for looping later
+    int x = 0;
+    int y = 0;
+    Tile t = screenMap[y][x];
+    int connectCount = 0; //Tracks the number of other tiles the current tile is connected to
+    
+    //Counting the number of Path tiles
+    for (int i=0; i<screenMap.length; i++) {
+      for (int j=0; j<screenMap[0].length; j++) {
+        if (Path.class.isInstance(screenMap[i][j])) {
+          pathCount++;
+        }
+      }
+    }
+    
+    route.add(screenMap[0][0]); //The first tile in the route is the top left corner
+    
+    //Going through each path tile on the board
+    for (int i=1; i<pathCount; i++) {
+      
+      y = t.posY/100; //Getting the position of the current Path tile in the screenMap array
+      x = t.posX/100;
+      
+      if ((y+1<screenMap.length)&&(Path.class.isInstance(screenMap[y+1][x]))&&(route.contains(screenMap[y+1][x])==false)) {
+        connectCount++;
+        t = screenMap[y+1][x];
+      } 
+      if ((y-1>=0)&&(Path.class.isInstance(screenMap[y-1][x]))&&(route.contains(screenMap[y-1][x])==false)) {
+        connectCount++;
+        t = screenMap[y-1][x];
+      } 
+      if ((x+1<screenMap[0].length)&&(Path.class.isInstance(screenMap[y][x+1]))&&(route.contains(screenMap[y][x+1])==false)) {
+        connectCount++;
+        t = screenMap[y][x+1];
+      } 
+      if ((x-1>=0)&&(Path.class.isInstance(screenMap[y][x-1]))&&(route.contains(screenMap[y][x-1])==false)) {
+        connectCount++;
+        t = screenMap[y][x-1];
+      }
+      
+      if ((connectCount>=2) || (connectCount==0)) { //If a path tile links to more than two tiles (including the previous one) or none, the path doesn't work
+        return null;
+      }
+      
+      connectCount = 0; //Resetting the number of connections of the latest tile in the route list
+      
+      route.add(t); //Adding the new tile to the route
+    }
+    if (t==screenMap[9][14]) { //If all tiles are connected properly, then the final tile should be the last tile at the bottom corner of the screen
+      return route;
+    }
+    return null;
+  }
+  
+  /**
+   * Draws the map with all its tiles onto the screen
+   * @param g A graphics object
+   */
+  public void drawMap(Graphics g) {
+    Tile t;
+    for (int i=0; i<screenMap.length; i++) {
+      for (int j=0; j<screenMap[0].length; j++) {
+        t = screenMap[i][j];
+        t.draw(g);
+      }
+    }
+  }
+}

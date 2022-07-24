@@ -1,0 +1,9 @@
+/**
+ * Interface for objects that move on the screen
+ */
+public interface Moveable {
+  /**
+   * A method for moving objects over the duration of one frame
+   */
+  public void move();
+}
