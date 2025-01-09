@@ -1,9 +1,0 @@
-/**
- * A class representing a path tile that enemies can travel on
- */
-public class Path extends Tile {
-  public Path(int posX, int posY) {
-    super(posX, posY);
-    this.imageName = "pathTile.png";
-  }
-}
