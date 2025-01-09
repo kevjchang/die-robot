@@ -1,9 +1,0 @@
-/**
- * A class that represents the standard terrain of the playable map
- */
-public class Ground extends Tile {
-  public Ground(int posX, int posY) {
-    super (posX, posY);
-    this.imageName = "groundTile.png";
-  }
-}
